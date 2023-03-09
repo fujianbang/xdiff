@@ -1,9 +1,11 @@
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use reqwest::{header::HeaderMap, Method};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tokio::fs;
 use url::Url;
+
+use crate::ExtraArgs;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DiffConfig {
@@ -43,8 +45,6 @@ pub struct ResponseProfile {
     pub skip_body: Vec<String>,
 }
 
-pub struct DiffArgs {}
-
 impl DiffConfig {
     pub async fn load_yaml(path: &str) -> Result<Self> {
         let content = fs::read_to_string(path).await?;
@@ -60,13 +60,15 @@ impl DiffConfig {
 }
 
 impl DiffProfile {
-    pub fn diff(&self, _args: DiffArgs) -> Result<String> {
+    pub async fn diff(&self, args: ExtraArgs) -> Result<String> {
         // let res1 = req1.send(&args).await?;
         // let res2 = req2.send(&args).await?;
 
         // let text1 = res1.filter_text(&self.res).await?;
         // let text2 = res2.filter_text(&self.res).await?;
 
-        todo!()
+        println!("profile: {:?}", self);
+        println!("args: {:?}", args);
+        Ok("".to_string())
     }
 }
