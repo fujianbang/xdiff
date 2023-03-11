@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
+use std::io::Write;
 use xdiff::{
     cli::{Action, Args, RunArgs},
     DiffConfig,
@@ -27,7 +28,11 @@ async fn run(args: RunArgs) -> Result<()> {
         .ok_or_else(|| anyhow::anyhow!("Profile {} not found", args.profile))?;
 
     let extra_args = args.extra_params.into();
-    profile.diff(extra_args).await?;
+    let output = profile.diff(extra_args).await?;
+
+    let stdout = std::io::stdout();
+    let mut stdout = stdout.lock();
+    write!(stdout, "{}", output)?;
 
     Ok(())
 }
