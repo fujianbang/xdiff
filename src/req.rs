@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use anyhow::{Ok, Result};
 use http::header;
 use reqwest::{
@@ -8,6 +6,8 @@ use reqwest::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::fmt::Write;
+use std::str::FromStr;
 use url::Url;
 
 use crate::{ExtraArgs, ResponseProfile};
@@ -91,18 +91,9 @@ impl ResponseExt {
     pub async fn filter_text(self, profile: &ResponseProfile) -> Result<String> {
         let res = self.0;
 
-        let mut output = String::new();
-        output.push_str(&format!("{:?} {}\n", res.version(), res.status()));
+        let mut output = get_headers(&res, &profile.skip_headers)?;
 
-        let headers = res.headers();
-        for (k, v) in headers.iter() {
-            if !profile.skip_headers.iter().any(|sh| sh == k.as_str()) {
-                output.push_str(&format!("{}: {:?}\n", k, v));
-            }
-        }
-        output.push('\n');
-
-        let content_type = get_content_type(headers);
+        let content_type = get_content_type(res.headers());
         let text = res.text().await?;
         match content_type.as_deref() {
             Some("application/json") => {
@@ -115,6 +106,21 @@ impl ResponseExt {
         }
         Ok(output)
     }
+}
+
+fn get_headers(res: &Response, skip_headers: &[String]) -> Result<String> {
+    let mut output = String::new();
+    output.push_str(&format!("{:?} {}\n", res.version(), res.status()));
+
+    let headers = res.headers();
+    for (k, v) in headers.iter() {
+        if !skip_headers.iter().any(|sh| sh == k.as_str()) {
+            output.push_str(&format!("{}: {:?}\n", k, v));
+        }
+    }
+    writeln!(&mut output)?;
+
+    Ok(output)
 }
 
 fn filter_json(text: &str, skip: &[String]) -> Result<String> {
