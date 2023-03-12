@@ -1,4 +1,4 @@
-use anyhow::{Ok, Result};
+use anyhow::{Context, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tokio::fs;
@@ -37,11 +37,22 @@ impl DiffConfig {
         Self::from_yaml(&content)
     }
     pub fn from_yaml(content: &str) -> Result<Self> {
-        Ok(serde_yaml::from_str(content)?)
+        let config: Self = serde_yaml::from_str(content)?;
+        config.validate()?;
+        Ok(config)
     }
 
     pub fn get_profile(&self, name: &str) -> Option<&DiffProfile> {
         self.profiles.get(name)
+    }
+
+    fn validate(&self) -> Result<()> {
+        for (name, profile) in &self.profiles {
+            profile
+                .validate()
+                .context(format!("failed to validate profile: {}", name))?;
+        }
+        Ok(())
     }
 }
 
@@ -54,5 +65,11 @@ impl DiffProfile {
         let text2 = res2.filter_text(&self.res).await?;
 
         diff_text(&text1, &text2)
+    }
+
+    fn validate(&self) -> Result<()> {
+        self.req1.validate().context("req1 failed to validate")?;
+        self.req2.validate().context("req2 failed to validate")?;
+        Ok(())
     }
 }
