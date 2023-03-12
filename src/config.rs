@@ -15,10 +15,15 @@ pub struct DiffConfig {
 pub struct DiffProfile {
     pub req1: RequestProfile,
     pub req2: RequestProfile,
+    #[serde(skip_serializing_if = "is_default", default)]
     pub res: ResponseProfile,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+fn is_default<T: Default + PartialEq>(v: &T) -> bool {
+    v == &T::default()
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default, PartialEq, Eq)]
 pub struct ResponseProfile {
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub skip_headers: Vec<String>,
