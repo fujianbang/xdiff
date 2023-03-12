@@ -126,17 +126,10 @@ fn get_headers(res: &Response, skip_headers: &[String]) -> Result<String> {
 fn filter_json(text: &str, skip: &[String]) -> Result<String> {
     let mut json: serde_json::Value = serde_json::from_str(text)?;
 
-    match json {
-        serde_json::Value::Object(ref mut obj) => {
-            for k in skip {
-                obj.remove(k);
-            }
+    if let serde_json::Value::Object(ref mut obj) = json {
+        for k in skip {
+            obj.remove(k);
         }
-        serde_json::Value::Null => todo!(),
-        serde_json::Value::Bool(_) => todo!(),
-        serde_json::Value::Number(_) => todo!(),
-        serde_json::Value::String(_) => todo!(),
-        serde_json::Value::Array(_) => todo!(),
     }
 
     Ok(serde_json::to_string_pretty(&json)?)
