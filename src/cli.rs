@@ -16,6 +16,7 @@ pub struct Args {
 pub enum Action {
     /// Diff two http requests and compare the differences of the responses
     Run(RunArgs),
+    Parse,
 }
 
 #[derive(Parser, Debug, Clone)]

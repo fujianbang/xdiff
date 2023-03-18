@@ -6,7 +6,6 @@ rust:
       user-agent: Aloha
     params:
       hello: world
-    body: abd
   req2:
     method: GET
     url: https://www.rust-lang.org/
