@@ -1,9 +1,8 @@
+use crate::{utils::diff_text, ExtraArgs, RequestProfile};
 use anyhow::{Context, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tokio::fs;
-
-use crate::{utils::diff_text, ExtraArgs, RequestProfile};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DiffConfig {
