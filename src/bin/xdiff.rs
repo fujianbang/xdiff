@@ -1,11 +1,45 @@
 use anyhow::{Ok, Result};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use dialoguer::{theme::ColorfulTheme, Input, MultiSelect};
 use std::{io::Write, vec};
 use xdiff::{
-    cli::{Action, Args, RunArgs},
+    cli::{parse_key_val, KeyVal},
     highlight_text, DiffConfig, DiffProfile, ExtraArgs, RequestProfile, ResponseProfile,
 };
+
+/// Diff two http requests and compare the differences of the responses
+#[derive(Parser, Debug, Clone)]
+#[clap(version, author, about, long_about = None)]
+pub struct Args {
+    #[clap(subcommand)]
+    pub action: Action,
+}
+
+#[derive(Subcommand, Debug, Clone)]
+#[non_exhaustive]
+pub enum Action {
+    /// Diff two http requests and compare the differences of the responses
+    Run(RunArgs),
+    Parse,
+}
+
+#[derive(Parser, Debug, Clone)]
+pub struct RunArgs {
+    /// Profile name
+    #[clap(short, long, value_parser)]
+    pub profile: String,
+
+    /// Overrides args. Could be used to override the query, headers and body of the request
+    /// For query params, user `-e key=value`
+    /// For headers, use `-e %key:value`
+    /// For body, use `-e @key:value`
+    #[clap(short, long, value_parser = parse_key_val, number_of_values = 1)]
+    pub extra_params: Vec<KeyVal>,
+
+    /// Configuration to use.
+    #[clap(short, long, value_parser)]
+    pub config: Option<String>,
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -14,7 +48,6 @@ async fn main() -> Result<()> {
     match args.action {
         Action::Run(args) => run(args).await?,
         Action::Parse => parse().await?,
-        _ => panic!("Not implementd"),
     }
 
     Ok(())

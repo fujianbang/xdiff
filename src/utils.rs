@@ -69,7 +69,7 @@ pub fn highlight_text(text: &str, extension: &str) -> Result<String> {
     let mut output = String::new();
     for line in LinesWithEndings::from(text) {
         let ranges = h.highlight_line(line, &ps).unwrap();
-        let escaped = as_24_bit_terminal_escaped(&ranges[..], true);
+        let escaped = as_24_bit_terminal_escaped(&ranges[..], false);
         write!(&mut output, "{}", escaped)?;
     }
 
